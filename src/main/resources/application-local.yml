@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: AIagent
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #url: jdbc:mysql://localhost:3306/jc_ai_agent?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/jc_ai_agent?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: "!@#QWE123qwe"
+  ai:
+    dashscope:
+      api-key: "sk-ws-H.RXPMRLY.lvmg.MEUCIQDpDjXpkXyFgnckZ2se7NlY6U2PEdnyzFgxlreYU0O4qwIgfcoRChHW3959fqrG3EWIupF-beECIFuWsgmaT1H6JTA"
