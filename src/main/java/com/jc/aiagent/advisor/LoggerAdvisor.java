@@ -25,7 +25,7 @@ public class LoggerAdvisor implements CallAdvisor, StreamAdvisor {
     @Override
     public int getOrder() {
         // 保留原有的 order 值
-        return 0;
+        return 10;
     }
 
     @Override
