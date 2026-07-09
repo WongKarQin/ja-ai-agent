@@ -7,7 +7,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
@@ -115,9 +115,7 @@ public class LoveApp {
                 .user(message)
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 //开启日志便于观察
-                .advisors(new LoggerAdvisor())
-                //应用RAG知识库问答
-                .advisors(new QuestionAnswerAdvisor(loveAppVectorStore))
+                .advisors(new LoggerAdvisor(), QuestionAnswerAdvisor.builder(loveAppVectorStore).build())
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();
