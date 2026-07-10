@@ -24,6 +24,17 @@ public class SafeGuardAdvisor implements CallAdvisor, StreamAdvisor {
         private int order = 2;
 
         public SafeGuardAdvisor() {}
+
+        @Override
+        public int getOrder() {
+                return this.order;
+        }
+
+        @Override
+        public String getName(){
+                return this.getClass().getSimpleName();
+        }
+
         @Override
         public ChatClientResponse adviseCall(ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain){
                 String userMessage = chatClientRequest.prompt().getUserMessage().getText();
@@ -58,6 +69,7 @@ public class SafeGuardAdvisor implements CallAdvisor, StreamAdvisor {
                         .context(Map.copyOf(chatClientRequest.context()))
                         .build();
         }
+
         @Override
         public Flux<ChatClientResponse> adviseStream(ChatClientRequest chatClientRequest, StreamAdvisorChain  streamAdvisorChain){
                 String userMessage = chatClientRequest.prompt().getUserMessage().getText();
@@ -82,14 +94,4 @@ public class SafeGuardAdvisor implements CallAdvisor, StreamAdvisor {
                         .build();
                 return Flux.just(response);
         }
-
-        @Override
-        public int getOrder() {
-                return this.order;
-        }
-        @Override
-        public String getName(){
-                return this.getClass().getSimpleName();
-        }
-
 }

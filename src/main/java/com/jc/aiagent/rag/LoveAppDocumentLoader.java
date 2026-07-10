@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 自定义的文档加载器
+ */
 @Component
 @Slf4j
 public class LoveAppDocumentLoader {

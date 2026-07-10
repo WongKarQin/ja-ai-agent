@@ -50,7 +50,11 @@ MySQL chat_memory 表
 写回记忆：对话完成后，saveAll 先删旧数据，再把当前窗口内的消息批量写入 MySQL
 ```
 
-这样就完全用 MyBatis 实现了对话记忆的 MySQL 持久化，不依赖 Spring AI 自带的 JDBC 方案。
-
-11.RAG知识库搭建。本地知识库和云知识库都要实现。①在pom.xml引入依赖spring-ai-markdown-document-reader。②新建rag目录，创建LoveAppDocumentLoader.java实现文档的加载和读取。③创建LoveAppVectorStoreConfig.java实现初始化向量数据库并保存文档。④在LoveApp实现QuestionAnswerAdvisor问答拦截器，实现查询增强和关联。⑤在LoveAppTest.java实现doChatWithRag()单元测试，故意提问一个文档内有回答的问题。⑥
+11.RAG知识库搭建。本地知识库实现。①在pom.xml引入依赖spring-ai-markdown-document-reader。②新建rag目录，创建LoveAppDocumentLoader.java实现文档的加载和读取。③创建LoveAppVectorStoreConfig.java实现初始化向量数据库并保存文档。④在LoveApp实现QuestionAnswerAdvisor问答拦截器，实现查询增强和关联。⑤在LoveAppTest.java实现doChatWithRag()单元测试，故意提问一个文档内有回答的问题。
 文档搜集和切割    ->   向量转换和存储    ->   切片过滤和检索    ->   查询增强和关联
+
+12.RAG知识库。Spring AI + 云知识库。①在阿里云百炼平台创建好云知识库。②创建LoveAppRagCloudAdvisorConfig.java，实现基于阿里云知识库服务的RAG增强Advisor。③在LoveApp.java的doChatWithRag()中添加应用检索增强服务。④在LoveAppTest.java中doChatWithRageTest()中进行单元测试。
+
+13.RAG知识库ETL。①创建MyTokenTextSpliter，实现基于Token的文本分割器。②创建MyKeywordEnricher.java,实现基于AI的文档元信息增强器，为文档补充元信息。
+
+14.基于PGVector实现向量存储，提高PostgreSQ存储和检索高维度向量数据的能力。①开通阿里云Serverless版本数据库服务并创建数据库②在IDEA->data source and drivers配置好url和登录信息，测试连接成功。③pom.xml引入spring-ai-vector-store-pgvector的依赖。④在application-local.yml编写配置，建立数据库连接。⑤创建PgVectorStoreConfig.java，初始化VectorStore，不需要Starter自动注入。⑥在AIagentApplication.java中启动类排除掉自动加载DataSourceAutoConfiguration.class。⑦创建测试类PgVectorStoreConfigTest.java。在Debug模式中，查看文档检索成功以及相似度分数score。IDEA右侧快捷栏，查看数据表中的数据。证明PGVector整合成功。可以用阿里云服务替换本地的VectorStore。

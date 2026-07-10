@@ -7,9 +7,9 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -21,6 +21,9 @@ import java.util.Optional;
 
 @Component
 @Slf4j
+/***
+ * 恋爱大师App
+ */
 public class LoveApp {
     private final ChatClient chatClient;
     private static final String SYSTEM_PROMPT = "扮演深耕恋爱心理领域的专家。开场向用户表明身份，告知用户可倾诉恋爱难题。" +
@@ -47,9 +50,9 @@ public class LoveApp {
                 .defaultAdvisors(
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
                         // 自定义日志拦截器 (Order=0)
-                        new LoggerAdvisor(),
+                        new LoggerAdvisor()
                         // 自定义敏感词拦截器 (Order=2)
-                        new SafeGuardAdvisor()
+//                        new SafeGuardAdvisor()
                 ).build();
     }
 
@@ -108,14 +111,24 @@ public class LoveApp {
             );
         }
     }
+
+    /**
+     * 对话接入RAG知识库
+     */
     @Resource
     private VectorStore loveAppVectorStore;
+    @Resource
+    private Advisor loveAppRagCloudAdvisor;
     public String doChatWithRag(String message, String chatId){
         ChatResponse chatResponse = chatClient.prompt()
                 .user(message)
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 //开启日志便于观察
-                .advisors(new LoggerAdvisor(), QuestionAnswerAdvisor.builder(loveAppVectorStore).build())
+                .advisors(new LoggerAdvisor())
+                // 应用 RAG 知识库问答
+//                .advisors(QuestionAnswerAdvisor.builder(loveAppVectorStore).build())
+                //应用RAG检索增强服务（阿里云知识库）
+                .advisors(loveAppRagCloudAdvisor)
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();

@@ -24,31 +24,8 @@ public class LoggerAdvisor implements CallAdvisor, StreamAdvisor {
 
     @Override
     public int getOrder() {
-        // 保留原有的 order 值
-        return 10;
-    }
-
-    @Override
-    public ChatClientResponse adviseCall(ChatClientRequest chatClientRequest, CallAdvisorChain chain) {
-        //before -> chain -> observeAfter
-        chatClientRequest = this.before(chatClientRequest);
-
-        ChatClientResponse chatClientResponse = chain.nextCall(chatClientRequest);
-
-        this.observeAfter(chatClientResponse);
-
-        return chatClientResponse;
-    }
-
-    @Override
-    public Flux<ChatClientResponse> adviseStream(ChatClientRequest chatClientRequest, StreamAdvisorChain chain) {
-        // before -> chain -> aggregator
-        chatClientRequest = this.before(chatClientRequest);
-
-        Flux<ChatClientResponse> chatClientResponseFlux = chain.nextStream(chatClientRequest);
-
-
-        return (new ChatClientMessageAggregator()).aggregateChatClientResponse(chatClientResponseFlux, this::observeAfter);
+        //优先级最高
+        return 0;
     }
 
     private ChatClientRequest before(ChatClientRequest request) {
@@ -59,5 +36,22 @@ public class LoggerAdvisor implements CallAdvisor, StreamAdvisor {
     private void observeAfter(ChatClientResponse chatClientResponse) {
         //获取AI回答
         log.info("====AI回答====：\n{}", Objects.requireNonNull(chatClientResponse.chatResponse().getResult().getOutput().getText()));
+    }
+
+    @Override
+    public ChatClientResponse adviseCall(ChatClientRequest chatClientRequest, CallAdvisorChain chain) {
+        //before -> chain -> observeAfter
+        chatClientRequest = this.before(chatClientRequest);
+        ChatClientResponse chatClientResponse = chain.nextCall(chatClientRequest);
+        this.observeAfter(chatClientResponse);
+        return chatClientResponse;
+    }
+
+    @Override
+    public Flux<ChatClientResponse> adviseStream(ChatClientRequest chatClientRequest, StreamAdvisorChain chain) {
+        // before -> chain -> aggregator
+        chatClientRequest = this.before(chatClientRequest);
+        Flux<ChatClientResponse> chatClientResponseFlux = chain.nextStream(chatClientRequest);
+        return (new ChatClientMessageAggregator()).aggregateChatClientResponse(chatClientResponseFlux, this::observeAfter);
     }
 }
