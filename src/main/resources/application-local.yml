@@ -2,11 +2,26 @@ spring:
   application:
     name: AIagent
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    #url: jdbc:mysql://localhost:3306/jc_ai_agent?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-    url: jdbc:mysql://localhost:3306/jc_ai_agent?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: "!@#QWE123qwe"
+    # MySQL 业务数据库
+    mysql:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/jc_ai_agent?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      username: root
+      password: "!@#QWE123qwe"
+    # PostgreSQL 向量数据库
+    postgres:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://rm-cn-ytx4v50b70001cio.rwlb.rds.aliyuncs.com:5432/jc_ai_agent
+      username: lovemaster
+      password: "!@#QWE123qwe_"
   ai:
     dashscope:
-      api-key: "sk-ws-H.RXPMRLY.lvmg.MEUCIQDpDjXpkXyFgnckZ2se7NlY6U2PEdnyzFgxlreYU0O4qwIgfcoRChHW3959fqrG3EWIupF-beECIFuWsgmaT1H6JTA"
+      api-key: "sk-ws-H.EMRELHY.9WUl.MEUCIQDGcdMHS9sRmy8d6_SvaOI1TRosEY1SFThdLA0yG-0oGAIgYaAkHZbYVeSdNBCHtsCezRGdKoiA-k6TyEgAt2gjGDU"
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        dimensions: 1536
+        distance-type: COSINE_DISTANCE
+        max-document-batch-size: 10000 # Optional: Maximum number of documents per batch
+        batching-strategy:
+          batch-size: 10

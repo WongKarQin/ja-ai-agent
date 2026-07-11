@@ -1,7 +1,7 @@
 package com.jc.aiagent.config;
 
-import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,31 +12,48 @@ import javax.sql.DataSource;
 
 @Configuration
 public class DataSourceConfig {
-
-    // ========== MySQL 数据源（业务库）==========
+    /** 绑定并创建 MySQL 数据源 */
+    @Bean
     @Primary
-    @Bean(name = "mysqlDataSource")
-    @ConfigurationProperties(prefix = "spring.datasource.mysql")
+    @ConfigurationProperties("spring.datasource.mysql")
+    public DataSourceProperties mysqlProperties() {
+        return new DataSourceProperties();
+    }
+
+    @Bean
+    @Primary
     public DataSource mysqlDataSource() {
-        return new HikariDataSource();
+        return mysqlProperties()
+                .initializeDataSourceBuilder()
+                .build();
     }
 
-    @Bean(name = "mysqlJdbcTemplate")
+    /** MySQL 上下文的 JdbcTemplate，其他组件默认注入 */
+    @Bean
+    @Primary
     public JdbcTemplate mysqlJdbcTemplate(
-            @Qualifier("mysqlDataSource") DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
+            @Qualifier("mysqlDataSource") DataSource ds) {
+        return new JdbcTemplate(ds);
     }
 
-    // ========== PostgreSQL 数据源（向量库）==========
-    @Bean(name = "pgDataSource")
-    @ConfigurationProperties(prefix = "spring.datasource.pgvector")
-    public DataSource pgDataSource() {
-        return new HikariDataSource();
+    /** 绑定并创建 PostgreSQL 数据源 */
+    @Bean
+    @ConfigurationProperties("spring.datasource.postgres")
+    public DataSourceProperties postgresProperties() {
+        return new DataSourceProperties();
     }
 
-    @Bean(name = "pgJdbcTemplate")
-    public JdbcTemplate pgJdbcTemplate(
-            @Qualifier("pgDataSource") DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
+    @Bean
+    public DataSource postgresDataSource() {
+        return postgresProperties()
+                .initializeDataSourceBuilder()
+                .build();
+    }
+
+    /** PostgreSQL 专用的 JdbcTemplate，供 PgVectorStore 使用 */
+    @Bean
+    public JdbcTemplate postgresJdbcTemplate(
+            @Qualifier("postgresDataSource") DataSource ds) {
+        return new JdbcTemplate(ds);
     }
 }
