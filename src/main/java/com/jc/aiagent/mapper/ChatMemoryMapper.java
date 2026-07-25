@@ -12,7 +12,7 @@ public interface ChatMemoryMapper {
      * 查询指定会话消息，按时间顺序
      * @return
      */
-    List<ChatMemoryEntity> selectByChatId(@Param("chatId") String chatId);
+    List<ChatMemoryEntity> selectByChatId(@Param("chatId") String chatId, @Param("userId") Long userId);
 
     /**
      * 批量插入消息
@@ -21,5 +21,5 @@ public interface ChatMemoryMapper {
     /**
      * 删除指定会话的所有消息
      */
-    void deleteByChatId(@Param("chatId") String chatId);
+    void deleteByChatId(@Param("chatId") String chatId, @Param("userId") Long userId);
 }

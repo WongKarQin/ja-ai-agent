@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class ChatMemoryEntity {
     private Long id;
     private String chatId;
+    private Long userId;
     private String content;
     private String type;//USER /ASSISTANt / SYSTEM/ TOOL
     private LocalDateTime timeStamp;

@@ -1,5 +1,7 @@
 ### Custom ###
 application-local.yml
+# 忽略临时文件目录
+/tmp/
 
 HELP.md
 target/

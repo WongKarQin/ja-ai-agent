@@ -1,5 +1,7 @@
 package com.jc.aiagent.repository;
 
+import com.jc.aiagent.context.ChatUserContextHolder;
+import com.jc.aiagent.context.UserContext;
 import com.jc.aiagent.entity.ChatMemoryEntity;
 import com.jc.aiagent.mapper.ChatMemoryMapper;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +9,7 @@ import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.messages.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,38 +22,47 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class MybatisChatMemoryRepository implements ChatMemoryRepository {
     private final ChatMemoryMapper chatMemoryMapper;
+
     /**
-     * 根据会话ID查询历史消息
+     * 根据会话ID查询历史消息（自动关联当前登录用户）
      */
     @Override
-    public List<Message> findByConversationId(String chatId){
-        List<ChatMemoryEntity> entities = chatMemoryMapper.selectByChatId(chatId);
+    public List<Message> findByConversationId(String chatId) {
+        Long userId = UserContext.getUserId();
+        if (userId == null) {
+            userId = ChatUserContextHolder.getUserId(chatId);
+        }
+        List<ChatMemoryEntity> entities = chatMemoryMapper.selectByChatId(chatId, userId);
         List<Message> messages = new ArrayList<>();
-        for(ChatMemoryEntity entity : entities){
+        for (ChatMemoryEntity entity : entities) {
             Message message = convetToMessage(entity);
-            if(message!=null){
+            if (message != null) {
                 messages.add(message);
             }
         }
         return messages;
     }
+
     /**
-     * 保存消息到数据库
-     * Spring AI 的 MessageWindowChatMemory 会在每次对话后调用此方法
-     * 传入的是当前窗口内的所有消息（已截断后的）
+     * 保存消息到数据库（自动关联当前登录用户）
      */
     @Override
-    public void saveAll(String chatId, List<Message> messages){
-        //先删除旧数据
-        chatMemoryMapper.deleteByChatId(chatId);
-        if(messages==null||messages.isEmpty()){
+    public void saveAll(String chatId, List<Message> messages) {
+        Long userId = UserContext.getUserId();
+        if (userId == null) {
+            userId = ChatUserContextHolder.getUserId(chatId);
+        }
+        // 先删除旧数据
+        chatMemoryMapper.deleteByChatId(chatId, userId);
+        if (messages == null || messages.isEmpty()) {
             return;
         }
-        //转化为实体并批量插入
+        // 转化为实体并批量插入
         List<ChatMemoryEntity> entities = new ArrayList<>();
-        for(Message message : messages){
+        for (Message message : messages) {
             ChatMemoryEntity entity = ChatMemoryEntity.builder()
                     .chatId(chatId)
+                    .userId(userId)
                     .content(message.getText())
                     .type(message.getMessageType().name())
                     .timeStamp(LocalDateTime.now())
@@ -59,20 +71,30 @@ public class MybatisChatMemoryRepository implements ChatMemoryRepository {
         }
         chatMemoryMapper.batchInsert(entities);
     }
+
     /**
      * 获取所有会话ID
      */
     @Override
-    public List<String> findConversationIds(){
+    public List<String> findConversationIds() {
         // 这里简单返回空列表，如果需要可以自行在 Mapper 中实现 selectAllChatIds()
         return Collections.emptyList();
     }
-    @Override
-    public void deleteByConversationId(String chatId){
 
+    @Override
+    public void deleteByConversationId(String chatId) {
+        Long userId = UserContext.getUserId();
+        if (userId == null) {
+            userId = ChatUserContextHolder.getUserId(chatId);
+        }
+        if (userId != null) {
+            chatMemoryMapper.deleteByChatId(chatId, userId);
+        }
     }
+
     /**
      * 将数据库中实体转换为Spring AI的Message对象
+     *
      * @param entity
      * @return
      */
@@ -81,14 +103,14 @@ public class MybatisChatMemoryRepository implements ChatMemoryRepository {
         MessageType type;
         try {
             type = MessageType.valueOf(entity.getType());
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return null;
         }
-        return switch(type){
-            case USER->new UserMessage(content);
-            case ASSISTANT->new AssistantMessage(content);
-            case SYSTEM->new SystemMessage(content);
-            case TOOL->{
+        return switch (type) {
+            case USER -> new UserMessage(content);
+            case ASSISTANT -> new AssistantMessage(content);
+            case SYSTEM -> new SystemMessage(content);
+            case TOOL -> {
                 ToolResponseMessage.ToolResponse response = new ToolResponseMessage.ToolResponse("id", "name", content);
                 // 使用 Builder 模式创建 ToolResponseMessage
                 yield ToolResponseMessage.builder().responses(List.of(response)).build();
