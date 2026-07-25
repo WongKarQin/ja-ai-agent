@@ -7,11 +7,11 @@ AI超级智能体基于OpenManus，为用户提供知识问答服务。
 
 
 
-![](imgs\lovemaster.png)
+![AI恋爱大师](imgs/lovemaster.png)
 
 
 
-![](imgs\openmanus.png)
+![AI超级智能体](imgs/openmanus.png)
 
 
 
