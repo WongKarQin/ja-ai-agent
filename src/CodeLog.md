@@ -600,5 +600,19 @@ A.恋爱大师
 B.超级智能体
 ![1784893235339](C:\Users\jade\AppData\Roaming\Typora\typora-user-images\1784893235339.png)
 
-34.使用Serverless快速部署AI服务。①创建application-prod.yml，在原yml基础上注释掉了mcp配置。②在根目录下创建Dockerfile。③在阿里云serverless托管平台创建环境、新建服务、上传代码、发布部署。④
+34.使用Serverless快速部署AI服务。①创建application-prod.yml，在原yml基础上注释掉了mcp配置。②在根目录下创建Dockerfile。③在阿里云serverless托管平台创建环境、新建服务、上传代码、发布部署。④创建nginx.conf。实现静态资源访问和反向配置。⑤创建Dockerfile和.dockerignore。
+
+```
+用户浏览器
+  ↓ 访问前端页面
+前端 Serverless（nginx:80）
+  ├── /              → 静态文件（Vue SPA）
+  ├── /api/*         → 反向代理到后端 Serverless
+  └── *.js/css/png   → 静态资源（1年缓存）
+  
+浏览器 → 前端Serverless(nginx:80)
+  /api/user/login
+    → proxy_pass https://lovemaster-web-...fcapp.run/api/user/login
+    → 后端 Spring Boot (context-path: /api) → /api/user/login
+```
 
