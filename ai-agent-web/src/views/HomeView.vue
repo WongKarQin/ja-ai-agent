@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+/* eslint-disable no-unused-vars */
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getUserInfo, clearAuth } from '../api/auth';

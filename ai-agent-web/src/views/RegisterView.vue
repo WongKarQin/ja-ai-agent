@@ -162,8 +162,9 @@ async function sendCode() {
     } else {
       errorMsg.value = res.data.message || '发送失败';
     }
-  } catch (err: any) {
-    errorMsg.value = err.response?.data?.message || '发送失败，请稍后重试';
+  } catch (err: unknown) {
+    const error = err as { response?: { data?: { message?: string } } };
+    errorMsg.value = error.response?.data?.message || '发送失败，请稍后重试';
   }
 }
 
@@ -213,8 +214,9 @@ async function handleRegister() {
     } else {
       errorMsg.value = res.data.message || '注册失败';
     }
-  } catch (err: any) {
-    errorMsg.value = err.response?.data?.message || '网络错误，请稍后重试';
+  } catch (err: unknown) {
+    const error = err as { response?: { data?: { message?: string } } };
+    errorMsg.value = error.response?.data?.message || '网络错误，请稍后重试';
   } finally {
     loading.value = false;
   }

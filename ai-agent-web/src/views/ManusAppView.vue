@@ -12,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+/* eslint-disable no-unused-vars */
 import { useRouter } from 'vue-router';
 import ChatRoom from '../components/ChatRoom.vue';
 import { doChatWithManus } from '../api/chat';
@@ -27,12 +28,12 @@ function handleSendMessage(message: string) {
     message,
     () => {}, // onMessage 在组件内部处理
     () => {}, // onError
-    () => {}  // onComplete
+    () => {}, // onComplete
   );
 
   return {
     eventSource,
-    close: () => eventSource.close()
+    close: () => eventSource.close(),
   };
 }
 </script>

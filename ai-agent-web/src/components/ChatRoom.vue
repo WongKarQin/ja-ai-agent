@@ -4,7 +4,7 @@
       <h2>{{ title }}</h2>
       <span class="chat-id" v-if="chatId">会话ID: {{ chatId }}</span>
     </div>
-    
+
     <div class="chat-messages" ref="messagesContainer">
       <div
         v-for="(msg, index) in messages"
@@ -19,7 +19,7 @@
           <div class="message-time">{{ msg.time }}</div>
         </div>
       </div>
-      
+
       <div v-if="isLoading" class="message message-ai loading">
         <div class="message-avatar">AI</div>
         <div class="message-content">
@@ -38,7 +38,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="chat-input-area">
       <div class="input-wrapper">
         <textarea
@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, defineProps } from 'vue';
 
 interface Message {
   role: 'user' | 'ai';
@@ -108,9 +108,9 @@ function handleSend() {
   messages.value.push({
     role: 'user',
     content: message,
-    time: getCurrentTime()
+    time: getCurrentTime(),
   });
-  
+
   inputMessage.value = '';
   isLoading.value = true;
   thinkingSteps.value = [];
@@ -121,7 +121,7 @@ function handleSend() {
   currentEventSource = result.eventSource;
 
   let aiContent = '';
-  
+
   // 默认事件处理（兼容 LoveApp 的未命名 SSE 事件）
   currentEventSource.onmessage = (event) => {
     if (event.data) {
@@ -134,7 +134,7 @@ function handleSend() {
         messages.value.push({
           role: 'ai',
           content: aiContent,
-          time: getCurrentTime()
+          time: getCurrentTime(),
         });
       }
       scrollToBottom();
@@ -156,7 +156,7 @@ function handleSend() {
       messages.value.push({
         role: 'ai',
         content: aiContent,
-        time: getCurrentTime()
+        time: getCurrentTime(),
       });
       // 收到答案后清空思考状态
       thinkingSteps.value = [];
@@ -169,8 +169,8 @@ function handleSend() {
     if (event.data) {
       messages.value.push({
         role: 'ai',
-        content: '⚠️ ' + event.data,
-        time: getCurrentTime()
+        content: `⚠️ ${event.data}`,
+        time: getCurrentTime(),
       });
     }
     isLoading.value = false;
@@ -199,7 +199,7 @@ function handleSend() {
       messages.value.push({
         role: 'ai',
         content: '⚠️ 连接异常，请重试',
-        time: getCurrentTime()
+        time: getCurrentTime(),
       });
     }
     isLoading.value = false;
@@ -217,7 +217,7 @@ onMounted(() => {
   messages.value.push({
     role: 'ai',
     content: '你好！我是你的AI助手，有什么可以帮助你的吗？',
-    time: getCurrentTime()
+    time: getCurrentTime(),
   });
 });
 </script>

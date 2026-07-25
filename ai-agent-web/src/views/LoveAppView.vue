@@ -13,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+/* eslint-disable no-unused-vars */
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ChatRoom from '../components/ChatRoom.vue';
@@ -29,18 +30,18 @@ function goBack() {
   router.push('/');
 }
 
-function handleSendMessage(message: string, chatId?: string) {
+function handleSendMessage(message: string, id?: string) {
   const eventSource = doChatWithLoveAppSse(
     message,
-    chatId || '',
+    id || '',
     () => {}, // onMessage 在组件内部处理
     () => {}, // onError
-    () => {}  // onComplete
+    () => {}, // onComplete
   );
 
   return {
     eventSource,
-    close: () => eventSource.close()
+    close: () => eventSource.close(),
   };
 }
 </script>

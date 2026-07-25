@@ -74,8 +74,9 @@ async function handleLogin() {
     } else {
       errorMsg.value = res.data.message || '登录失败';
     }
-  } catch (err: any) {
-    errorMsg.value = err.response?.data?.message || '网络错误，请稍后重试';
+  } catch (err: unknown) {
+    const error = err as { response?: { data?: { message?: string } } };
+    errorMsg.value = error.response?.data?.message || '网络错误，请稍后重试';
   } finally {
     loading.value = false;
   }
