@@ -605,17 +605,17 @@ B.超级智能体
 ②在根目录下创建Dockerfile。
 ③在阿里云serverless托管平台创建环境、新建服务、上传代码、发布部署。
 ④创建nginx.conf。实现静态资源访问和反向配置。
-⑤创建Dockerfile和.dockerignore。
-⑥创建阿里云云效 DevOps 控制台，创建流水线实现自动构建镜像 + 推送到 ACR + 部署到 FC。
-⑦Docker HUB访问超时，使用阿里云镜像加速器。
+⑤在前端目录下创建Dockerfile和.dockerignore。
+⑥将前端代码推送到阿里云CodeUp。
+⑦创建阿里云云效 DevOps 控制台，创建流水线实现自动构建镜像 + 推送到 ACR + 部署到 FC。
+⑧Docker HUB访问超时，使用阿里云镜像加速器。
 
 ```
 用户浏览器
-  ↓ 访问前端页面
-前端 Serverless（nginx:80）
-  ├── /              → 静态文件（Vue SPA）
-  ├── /api/*         → 反向代理到后端 Serverless
-  └── *.js/css/png   → 静态资源（1年缓存）
+    ↓
+阿里云 FC（前端 nginx 容器，端口 9000）
+    ├── 静态文件 → Vue3 前端页面
+    └── /api/ 反向代理 → 后端 Serverless 地址
   
 浏览器 → 前端Serverless(nginx:80)
   /api/user/login
