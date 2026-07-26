@@ -61,7 +61,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, defineProps } from 'vue';
+/* eslint-disable no-undef */
+import { ref, onMounted, nextTick } from 'vue';
 
 interface Message {
   role: 'user' | 'ai';
