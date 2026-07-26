@@ -1,8 +1,4 @@
 spring:
-  ai:
-    mcp:
-      client:
-        enabled: false
   datasource:
     mysql:
       driver-class-name: com.mysql.cj.jdbc.Driver
@@ -19,12 +15,18 @@ spring:
       api-key: ${DASHSCOPE_API_KEY:}
       chat:
         options:
-          model: ${AI_MODEL:qwen-max}
+          model: ${AI_MODEL:qwen-max} # qwen-plus
           max-tokens: 8000
+      embedding:
+        options:
+          model: qwen3.7-text-embedding # text-embedding-v3
+    mcp:
+      client:
+        enabled: false
     vectorstore:
       pgvector:
         index-type: HNSW
-        dimensions: 1536
+        dimensions: 1024
         distance-type: COSINE_DISTANCE
         max-document-batch-size: 10000
         batching-strategy:
@@ -52,3 +54,33 @@ weather:
       url: https://restapi.amap.com/v3/geocode/geo
 search-api:
   api-key: ${SEARCH_API_KEY:}
+server:
+  port: 8123
+  servlet:
+    context-path: /api
+# springdoc-openapi??????
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.jc.aiagent.controller
+# knife4j interface setting
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.jc.aiagent.entity
+  configuration:
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    com.alibaba.cloud.ai.dashscope: DEBUG
+    org.springframework.ai: DEBUG

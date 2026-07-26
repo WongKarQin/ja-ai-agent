@@ -9,6 +9,7 @@ import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
@@ -16,9 +17,14 @@ import java.util.List;
 import static org.springframework.ai.vectorstore.pgvector.PgVectorStore.PgDistanceType.COSINE_DISTANCE;
 import static org.springframework.ai.vectorstore.pgvector.PgVectorStore.PgIndexType.HNSW;
 
+/**
+ * 基于 PgVector 的向量存储配置。
+ * 仅在 local profile 下启用：初始化阶段会调用 DashScope Embedding API 对文档进行向量化，
+ * 云环境（tencentcloud）下网络调用易被中断导致启动失败，因此禁用。
+ */
 @Slf4j
-// 为方便开发调试和部署，临时注释，如果需要使用 PgVector 存储知识库，取消注释即可
 @Configuration
+@Profile("local")
 public class PgVectorVectorStoreConfig {
 
     private static final String SCHEMA_NAME = "public";

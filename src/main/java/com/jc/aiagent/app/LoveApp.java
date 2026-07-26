@@ -2,22 +2,18 @@ package com.jc.aiagent.app;
 
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.jc.aiagent.advisor.LoggerAdvisor;
-import com.jc.aiagent.advisor.SafeGuardAdvisor;
 import com.jc.aiagent.rag.LoveAppRagCustomAdvisorFactory;
 import com.jc.aiagent.rag.QueryRewriter;
 import com.jc.aiagent.repository.MybatisChatMemoryRepository;
-import com.jc.aiagent.tools.PDFGenerationTool;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -132,13 +128,14 @@ public class LoveApp {
     /**
      * 对话接入RAG知识库
      */
-    @Resource
+    @Autowired(required = false)
     private VectorStore loveAppVectorStore;
-    @Resource
-    private Advisor loveAppRagCloudAdvisor;
-    @Resource
-    private QueryRewriter loveAppQueryRewriter;
+
     public String doChatWithRag(String message, String chatId){
+        if (loveAppVectorStore == null) {
+            log.warn("RAG向量存储未启用（当前环境无 VectorStore Bean），回退到普通对话");
+            return doChat(message, chatId);
+        }
         //应用查询重写
         message = queryRewriter.doQueryRewrite(message);
         ChatResponse chatResponse = chatClient.prompt()
@@ -146,8 +143,6 @@ public class LoveApp {
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
                 // 应用 RAG 知识库问答
                 .advisors(QuestionAnswerAdvisor.builder(loveAppVectorStore).build())
-                //应用RAG检索增强服务（阿里云知识库）
-//                .advisors(loveAppRagCloudAdvisor)
                 //应用CustomAdvisorFactory
                 .advisors(LoveAppRagCustomAdvisorFactory.createLoveAppRagCustomAdvisor(loveAppVectorStore, "已婚"))
                 .call()
@@ -160,9 +155,14 @@ public class LoveApp {
     /***
      * AI恋爱报告支持工具调用
      */
-    @Resource
+    @Autowired(required = false)
     private ToolCallback[] allTools;
+
     public String doChatWithTools(String message, String chatId){
+        if (allTools == null || allTools.length == 0) {
+            log.warn("工具调用未启用（当前环境无 ToolCallback Bean），回退到普通对话");
+            return doChat(message, chatId);
+        }
         ChatResponse response = chatClient.prompt()
                 .user(message)
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
@@ -177,10 +177,14 @@ public class LoveApp {
     /**
      * 使用MCP服务完成对话
      */
-    @Resource
+    @Autowired(required = false)
     private ToolCallbackProvider toolCallbackProvider;
 
     public String doChatWithMcp(String message, String chatId) {
+        if (toolCallbackProvider == null) {
+            log.warn("MCP服务未启用（当前环境无 ToolCallbackProvider Bean），回退到普通对话");
+            return doChat(message, chatId);
+        }
         ChatResponse response = chatClient
                 .prompt()
                 .user(message)

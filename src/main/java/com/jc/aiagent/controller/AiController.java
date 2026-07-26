@@ -7,6 +7,7 @@ import com.jc.aiagent.context.UserContext;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +28,7 @@ public class AiController {
     @Resource
     private LoveApp loveApp;
 
-    @Resource
+    @Autowired(required = false)
     private ToolCallback[] allTools;
 
     @Resource
@@ -117,6 +118,16 @@ public class AiController {
      */
     @GetMapping("/manus/chat")
     public SseEmitter doChatWithManus(String message) {
+        if (allTools == null || allTools.length == 0) {
+            SseEmitter sseEmitter = new SseEmitter(180000L);
+            try {
+                sseEmitter.send(SseEmitter.event().data("Manus智能体未启用（当前环境无工具注册），请使用基础对话功能。"));
+                sseEmitter.complete();
+            } catch (IOException e) {
+                sseEmitter.completeWithError(e);
+            }
+            return sseEmitter;
+        }
         LoveManus loveManus = new LoveManus(allTools, dashscopeChatModel);
         return loveManus.runStream(message);
     }
