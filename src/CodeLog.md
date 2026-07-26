@@ -641,3 +641,36 @@ B.超级智能体
 
 35.使用腾讯云Serverless快速部署AI服务。
 
+①创建application-tencentcloud.yml，在DockerFile修改profile为tencentcloud，在nginx.conf修改监听端口为80，proxy_pass 从阿里云公网 HTTPS 改为腾讯云内网 HTTP。
+
+②购买TencentDB for MySQL，记下内网地址。配置环境内网互通。将 TencentDB 实例放入云托管环境所在的 VPC 网络。登录并使用SQL语句建表。
+
+③继续使用阿里云的PostgreSQL。走公网连接，配置 PG_HOST 为阿里云公网地址即可。
+
+④在GUI创建云托管环境。创建恋爱大师后端服务。服务名：lovemaster-backend，部署方式：上传代码包（项目根目录 zip，不含 ai-agent-web/、image-search-mcp-server/ 等子目录），监听端口：8123，填写好环境变量。
+
+环境变量：
+```
+MYSQL_HOST	TencentDB 内网地址
+MYSQL_PORT	3306
+MYSQL_DB	jc_ai_agent
+MYSQL_USERNAME	数据库用户名
+MYSQL_PASSWORD	数据库密码
+PG_HOST	PostgreSQL 地址
+PG_PORT	5432
+PG_DB	jc_ai_agent
+PG_USERNAME	用户名
+PG_PASSWORD	密码
+DASHSCOPE_API_KEY	sk-ws-H.EMRELHY...
+WEATHER_API_KEY	天气 API Key
+SEARCH_API_KEY	搜索 API Key
+MAIL_USERNAME	邮箱地址
+MAIL_PASSWORD	邮箱授权码
+```
+⑤创建前端服务。服务名：lovemaster-frontend，部署方式：上传代码包（仅 ai-agent-web/ 文件夹内容打包为 zip），目标目录：留空，监听端口：80。
+
+proxy_pass 地址可能需要在后端部署完成后，根据实际内网地址微调。可以先部署后端，拿到内网地址后，再更新 nginx.conf。
+
+⑥验证内网代理。前端服务部署后，需要确认 nginx.conf 中的 proxy_pass 地址，如果云托管内网服务发现自动可用，http://lovemaster-backend:8123 应该直接生效，如果不行，替换为后端服务的实际内网访问地址（部署后在后端服务详情中查看）。
+
+⑦项目验收。浏览器打开前端服务的默认域名 → 应直接渲染页面，测试登录、AI 对话等功能。
