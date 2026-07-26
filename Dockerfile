@@ -1,16 +1,21 @@
-# 使用预装 Maven 和 JDK21 的镜像
-FROM maven:3.9-amazoncorretto-21
+# 后端构建阶段（使用国内镜像代理）
+FROM docker.m.daocloud.io/library/maven:3.9-amazoncorretto-21 AS build
 WORKDIR /app
 
-# 只复制必要的源代码和配置文件
+# 先复制 pom.xml，利用 Docker 缓存加速依赖下载
 COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# 再复制源代码
 COPY src ./src
 
-# 使用 Maven 执行打包
+# 打包（跳过测试）
 RUN mvn clean package -DskipTests
 
-# 暴露应用端口
+# 运行阶段（使用更小的 JDK 镜像）
+FROM docker.m.daocloud.io/library/amazoncorretto:21
+WORKDIR /app
+COPY --from=build /app/target/AIagent-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8123
-
-# 使用生产环境配置启动应用
-CMD ["java", "-jar", "/app/target/yu-ai-agent-0.0.1-SNAPSHOT.jar", "--spring.profiles.active=prod"]
+# 使用腾讯云环境配置启动
+CMD ["java", "-jar", "app.jar", "--spring.profiles.active=tencentcloud"]

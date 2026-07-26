@@ -491,6 +491,7 @@ repository/MybatisChatMemoryRepository.java	自动从 ThreadLocal 获取 userId
 ##### 拦截器优化：
 
 浏览器 EventSource API 不支持自定义请求头，无法发送 Authorization: Bearer xxx，导致 SSE 请求被拦截器返回 401，前端无任何提示。
+
 修改的 3 个文件：
 
 ```
@@ -532,6 +533,7 @@ reactor线程: Flux处理 → MemoryRepository.saveAll() → UserContext.getUser
 ##### 优化AI超级智能体的回答内容和思考长度：
 
 问题1：用户问“深圳今日天气如何？” Agent直接开始思考...回答出无效内容。
+
 解决方法：
 
 ```
@@ -543,6 +545,7 @@ reactor线程: Flux处理 → MemoryRepository.saveAll() → UserContext.getUser
 在 system prompt 中增加了明确的指令：天气相关查询 必须直接使用 getWeather 或 getLocalWeather，禁止使用 web search/scraping
 ```
 问题2：Agent的显示出思考过程不够精简，用户阅读体验差。
+
 解决方法--精简显示Agent的思考过程：
 
 ```
@@ -598,17 +601,30 @@ A.恋爱大师
 ![1784893051021](C:\Users\jade\AppData\Roaming\Typora\typora-user-images\1784893051021.png)
 
 B.超级智能体
+
 ![1784893235339](C:\Users\jade\AppData\Roaming\Typora\typora-user-images\1784893235339.png)
 
-34.使用Serverless快速部署AI服务。
+34.使用阿里云Serverless快速部署AI服务。
+
 ①创建application-prod.yml，在原yml基础上注释掉了mcp配置。
+
 ②在根目录下创建Dockerfile。
+
 ③在阿里云serverless托管平台创建环境、新建服务、上传代码、发布部署。
+
 ④创建nginx.conf。实现静态资源访问和反向配置。
+
 ⑤在前端目录下创建Dockerfile和.dockerignore。
+
 ⑥将前端代码推送到阿里云CodeUp。
+
 ⑦创建阿里云云效 DevOps 控制台，创建流水线实现自动构建镜像 + 推送到 ACR + 部署到 FC。
+
 ⑧Docker HUB访问超时，使用阿里云镜像加速器。
+
+⑨在阿里云函数计算控制台，进入后端服务并创建前端函数。创建 Custom Container 函数。配置 HTTP 触发器。等待创建完成并获取访问地址。验证部署。
+
+⑩测试函数执行成功。访问公网地址自动下载，无法渲染，还需要域名配置。转投腾讯云serverless配置，不需要域名。 
 
 ```
 用户浏览器
@@ -622,4 +638,6 @@ B.超级智能体
     → proxy_pass https://lovemaster-web-...fcapp.run/api/user/login
     → 后端 Spring Boot (context-path: /api) → /api/user/login
 ```
+
+35.使用腾讯云Serverless快速部署AI服务。
 

@@ -1,0 +1,50 @@
+spring:
+  datasource:
+    mysql:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:jc_ai_agent}?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${MYSQL_USERNAME:root}
+      password: ${MYSQL_PASSWORD:}
+    postgres:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_DB:jc_ai_agent}
+      username: ${PG_USERNAME:postgres}
+      password: ${PG_PASSWORD:}
+  ai:
+    dashscope:
+      api-key: ${DASHSCOPE_API_KEY:}
+      chat:
+        options:
+          model: ${AI_MODEL:qwen-max}
+          max-tokens: 8000
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        dimensions: 1536
+        distance-type: COSINE_DISTANCE
+        max-document-batch-size: 10000
+        batching-strategy:
+          batch-size: 10
+  mail:
+    host: ${MAIL_HOST:smtp.qq.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+weather:
+  api:
+    key: ${WEATHER_API_KEY:}
+    url: https://restapi.amap.com/v3/weather/weatherInfo
+    ip:
+      url: https://restapi.amap.com/v3/ip
+    geo:
+      url: https://restapi.amap.com/v3/geocode/geo
+search-api:
+  api-key: ${SEARCH_API_KEY:}

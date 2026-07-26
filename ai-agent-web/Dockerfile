@@ -11,7 +11,7 @@ FROM docker.m.daocloud.io/library/nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 # 复制自定义 nginx 配置替换默认配置
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-# 曝露端口（阿里云 FC 3.0 默认侧听 9000 端口）
-EXPOSE 9000
+# 曝露端口
+EXPOSE 80
 # 启动 Nginx
 CMD ["nginx", "-g", "daemon off;"]
