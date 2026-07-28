@@ -111,6 +111,20 @@ const form = reactive({
 
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
+/**
+ * 将后端返回的技术错误信息转换为用户友好提示
+ */
+function toUserMessage(raw: string, fallback: string): string {
+  if (!raw) return fallback;
+  if (raw.includes('CannotGetJdbcConnectionException') || raw.includes('JDBC Connection')) {
+    return '服务暂时不可用，请稍后重试';
+  }
+  if (raw.includes('timeout') || raw.includes('Timeout')) {
+    return '请求超时，请检查网络后重试';
+  }
+  return raw;
+}
+
 function startCountdown() {
   codeCountdown.value = 60;
   countdownTimer = setInterval(() => {
@@ -163,8 +177,9 @@ async function sendCode() {
       errorMsg.value = res.data.message || '发送失败';
     }
   } catch (err: unknown) {
-    const error = err as { response?: { data?: { message?: string } } };
-    errorMsg.value = error.response?.data?.message || '发送失败，请稍后重试';
+    const error = err as { response?: { data?: { message?: string }; status?: number } };
+    const rawMsg = error.response?.data?.message || '';
+    errorMsg.value = toUserMessage(rawMsg, '发送失败，请稍后重试');
   }
 }
 
@@ -215,8 +230,9 @@ async function handleRegister() {
       errorMsg.value = res.data.message || '注册失败';
     }
   } catch (err: unknown) {
-    const error = err as { response?: { data?: { message?: string } } };
-    errorMsg.value = error.response?.data?.message || '网络错误，请稍后重试';
+    const error = err as { response?: { data?: { message?: string }; status?: number } };
+    const rawMsg = error.response?.data?.message || '';
+    errorMsg.value = toUserMessage(rawMsg, '网络错误，请稍后重试');
   } finally {
     loading.value = false;
   }

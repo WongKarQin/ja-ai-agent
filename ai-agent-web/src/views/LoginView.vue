@@ -56,6 +56,23 @@ const form = reactive({
   password: ''
 });
 
+/**
+ * 将后端返回的技术错误信息转换为用户友好提示
+ */
+function toUserMessage(raw: string): string {
+  if (!raw) return '登录失败，请稍后重试';
+  // 数据库连接异常
+  if (raw.includes('CannotGetJdbcConnectionException') || raw.includes('JDBC Connection')) {
+    return '服务暂时不可用，请稍后重试';
+  }
+  // 超时
+  if (raw.includes('timeout') || raw.includes('Timeout')) {
+    return '请求超时，请检查网络后重试';
+  }
+  // 业务错误（用户不存在、密码错误等）直接展示
+  return raw;
+}
+
 async function handleLogin() {
   if (!form.email || !form.password) {
     errorMsg.value = '请填写完整信息';
@@ -72,11 +89,22 @@ async function handleLogin() {
       saveAuth(token, form.email);
       router.push('/');
     } else {
-      errorMsg.value = res.data.message || '登录失败';
+      errorMsg.value = toUserMessage(res.data.message || '');
     }
   } catch (err: unknown) {
-    const error = err as { response?: { data?: { message?: string } } };
-    errorMsg.value = error.response?.data?.message || '网络错误，请稍后重试';
+    const error = err as { response?: { data?: { message?: string }; status?: number } };
+    const status = error.response?.status;
+    const rawMsg = error.response?.data?.message || '';
+    // 网络层面的错误
+    if (status === 502 || status === 503 || status === 504) {
+      errorMsg.value = '服务暂时不可用，请稍后重试';
+    } else if (status === 500) {
+      errorMsg.value = toUserMessage(rawMsg);
+    } else if (!status && rawMsg.includes('Network Error')) {
+      errorMsg.value = '网络连接失败，请检查网络后重试';
+    } else {
+      errorMsg.value = toUserMessage(rawMsg);
+    }
   } finally {
     loading.value = false;
   }

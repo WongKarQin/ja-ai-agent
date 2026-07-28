@@ -1,0 +1,14 @@
+ai-agent-web/
+ai-agent-frontend/
+image-search-mcp-server/
+.git/
+.idea/
+*.iml
+target/
+*.log
+*.zip
+tmp/
+.uploads/
+imgs/
+README.md
+HELP.md

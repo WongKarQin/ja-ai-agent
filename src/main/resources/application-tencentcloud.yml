@@ -2,9 +2,14 @@ spring:
   datasource:
     mysql:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:jc_ai_agent}?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:jc_ai_agent}?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=5000&socketTimeout=10000
       username: ${MYSQL_USERNAME:root}
       password: ${MYSQL_PASSWORD:}
+      hikari:
+        connection-timeout: 5000
+        validation-timeout: 3000
+        maximum-pool-size: 10
+        minimum-idle: 2
     postgres:
       driver-class-name: org.postgresql.Driver
       url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_DB:jc_ai_agent}
@@ -50,6 +55,9 @@ server:
   port: 8123
   servlet:
     context-path: /api
+  error:
+    include-message: never
+    include-stacktrace: never
 # springdoc-openapi??????
 springdoc:
   swagger-ui:
